@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORION-EYE | Space Debris Avoidance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+        
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .mono { font-family: 'Share Tech Mono', monospace; }
+        
+        .cyber-border {
+            border: 1px solid #1e293b;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .cyber-corner::before, .cyber-corner::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-color: #06b6d4;
+            border-style: solid;
+            transition: all 0.3s ease;
+        }
+        .cyber-corner::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .cyber-corner::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        
+        .status-ok { color: #4ade80; }
+        .status-warn { color: #facc15; }
+        .status-crit { color: #f87171; text-shadow: 0 0 5px #f87171; }
+    </style>
+</head>
+<body class="p-6 h-screen flex flex-col gap-4 overflow-hidden">
+
+    <header class="cyber-border bg-slate-900/80 p-4 rounded text-center cyber-corner mb-2">
+        <div class="flex items-center justify-center gap-2 mb-1">
+            <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <h1 class="text-3xl font-bold tracking-widest text-cyan-400">ORION-EYE</h1>
+        </div>
+        <p class="text-xs text-slate-400 uppercase tracking-widest">Simulated Onboard AI for Space Debris Avoidance | 10-Layer Architecture</p>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 flex-1 min-h-0">
+        
+        <div class="col-span-3 flex flex-col gap-4">
+            <div class="cyber-border bg-slate-900/50 p-4 rounded cyber-corner">
+                <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                    <span>📊</span> System Status
+                </h3>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="bg-slate-800 p-2 rounded text-center">
+                        <div class="text-[10px] text-slate-400">Objects Detected</div>
+                        <div class="text-xl font-bold" id="obj-count">0</div>
+                    </div>
+                    <div class="bg-slate-800 p-2 rounded text-center">
+                        <div class="text-[10px] text-slate-400">Critical Threats</div>
+                        <div class="text-xl font-bold text-red-500" id="crit-count">0</div>
+                    </div>
+                    <div class="bg-slate-800 p-2 rounded text-center">
+                        <div class="text-[10px] text-slate-400">High Risk</div>
+                        <div class="text-xl font-bold text-amber-500" id="risk-count">0</div>
+                    </div>
+                    <div class="bg-slate-800 p-2 rounded text-center">
+                        <div class="text-[10px] text-slate-400">System Status</div>
+                        <div class="text-xl font-bold status-ok" id="sys-status">OK</div>
+                    </div>
+                </div>
+                <div class="border border-cyan-900/50 bg-cyan-900/10 p-3 rounded">
+                    <div class="text-cyan-300 font-bold text-sm" id="action-header">MAINTAIN_COURSE</div>
+                    <div class="text-xs text-slate-400" id="action-desc">No high-risk objects detected</div>
+                </div>
+            </div>
+
+            <div class="cyber-border bg-slate-900/50 p-4 rounded flex-1 cyber-corner">
+                <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                    <span>🚀</span> Maneuver Planning
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between border-b border-slate-700 pb-1">
+                        <span class="text-slate-400">Maneuver Type:</span>
+                        <span class="font-bold text-white" id="man-type">NONE</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-700 pb-1">
+                        <span class="text-slate-400">Delta-V:</span>
+                        <span class="font-bold mono" id="delta-v">0.000 km/s</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-700 pb-1">
+                        <span class="text-slate-400">Burn Duration:</span>
+                        <span class="font-bold mono">0 seconds</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-700 pb-1">
+                        <span class="text-slate-400">Fuel Cost:</span>
+                        <span class="font-bold mono">0.00 kg</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 hidden" id="crit-alert">
+                    <div class="text-amber-500 text-xs font-bold mb-1">⚠️ EDGE CASES</div>
+                    <div class="bg-red-900/20 border-l-4 border-red-500 p-2 text-xs">
+                        <div class="text-red-400 font-bold">TIME_CRITICAL (CRITICAL)</div>
+                        <div class="text-slate-300">Object approaching in <60 seconds</div>
+                        <div class="text-blue-300 mt-1">Mitigation: Immediate maneuver execution required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-5 cyber-border bg-black rounded p-1 flex flex-col relative cyber-corner">
+            <h3 class="absolute top-3 left-4 z-10 text-cyan-400 font-bold flex items-center gap-2 bg-black/50 px-2 rounded">
+                <span>🎥</span> Real-Time Camera Detection
+            </h3>
+            <div class="flex-1 flex items-center justify-center overflow-hidden bg-black">
+                <img src="{{ url_for('video_feed') }}" alt="Live Feed" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-cyan-500"></div>
+            <div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-cyan-500"></div>
+            <div class="absolute top-12 right-4 w-4 h-4 border-t-2 border-r-2 border-cyan-500"></div>
+            <div class="absolute top-12 left-4 w-4 h-4 border-t-2 border-l-2 border-cyan-500"></div>
+        </div>
+
+        <div class="col-span-4 flex flex-col gap-4">
+            <div class="cyber-border bg-slate-900/50 p-4 rounded h-1/3 cyber-corner">
+                <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                    <span>🎯</span> Detected Objects
+                </h3>
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-800 text-slate-400">
+                        <tr>
+                            <th class="p-2">ID</th>
+                            <th class="p-2">Type</th>
+                            <th class="p-2">Dist (km)</th>
+                            <th class="p-2">Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="obj-table-body" class="mono text-slate-300">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="cyber-border bg-slate-900/50 p-4 rounded flex-1 flex flex-col cyber-corner">
+                <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                    <span>📝</span> Explainable AI Logs
+                </h3>
+                <div class="flex-1 bg-black/40 rounded p-2 mono text-xs overflow-y-auto space-y-2" id="log-container">
+                    <div class="border-l-2 border-cyan-500 pl-2 text-slate-400">
+                        <span class="text-cyan-600">[SYSTEM]</span> AADES Initialized. Waiting for stream...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard() {
+            fetch('/api/telemetry')
+                .then(response => response.json())
+                .then(data => {
+                    const m = data.metrics;
+                    
+                    document.getElementById('obj-count').innerText = m.objects_detected;
+                    document.getElementById('crit-count').innerText = m.critical_threats;
+                    document.getElementById('sys-status').innerText = m.system_status;
+                    
+                    const statusEl = document.getElementById('sys-status');
+                    if(m.system_status === "OK" || m.system_status === "SCANNING") {
+                        statusEl.className = "text-xl font-bold status-ok";
+                        document.getElementById('action-header').innerText = "MAINTAIN_COURSE";
+                        document.getElementById('action-desc').innerText = "No high-risk objects detected";
+                        document.getElementById('crit-alert').classList.add('hidden');
+                    } else {
+                        statusEl.className = "text-xl font-bold status-crit";
+                        document.getElementById('action-header').innerText = "EVASIVE MANEUVER";
+                        document.getElementById('action-header').classList.add('text-red-500');
+                        document.getElementById('action-desc').innerText = "Critical collision probability detected";
+                        document.getElementById('crit-alert').classList.remove('hidden');
+                    }
+
+                    document.getElementById('man-type').innerText = m.maneuver;
+                    document.getElementById('delta-v').innerText = m.delta_v;
+
+                    const tbody = document.getElementById('obj-table-body');
+                    tbody.innerHTML = '';
+                    m.detected_objects.forEach(obj => {
+                        const row = `
+                            <tr class="border-b border-slate-800">
+                                <td class="p-2">${obj.id}</td>
+                                <td class="p-2">${obj.type}</td>
+                                <td class="p-2">${obj.distance}</td>
+                                <td class="p-2">
+                                    <span class="${obj.risk === 'CRITICAL' ? 'bg-red-600' : 'bg-green-600'} px-2 py-0.5 rounded text-[10px] text-white">
+                                        ${obj.risk}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+
+                    const logContainer = document.getElementById('log-container');
+                    logContainer.innerHTML = '';
+                    data.logs.forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = "border-l-2 border-cyan-500 pl-2 text-slate-300";
+                        div.innerText = log;
+                        logContainer.appendChild(div);
+                    });
+                });
+        }
+
+        setInterval(updateDashboard, 500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+names:
+- PaperBall
+nc: 1
+roboflow:
+  license: Public Domain
+  project: find-paperballs
+  url: https://universe.roboflow.com/projectsdata/find-paperballs/dataset/1
+  version: 1
+  workspace: projectsdata
+test: ../test/images
+train: ../train/images
+val: ../valid/images
